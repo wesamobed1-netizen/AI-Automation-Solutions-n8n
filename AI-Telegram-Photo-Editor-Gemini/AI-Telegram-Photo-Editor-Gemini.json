@@ -1,0 +1,245 @@
+{
+  "name": "Generate an image",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -688,
+        96
+      ],
+      "id": "8dc5590f-67ab-4c6d-9dba-0706021f6254",
+      "name": "Telegram Trigger",
+      "webhookId": "789cd583-e009-41e4-9dc2-4c5c240d4d10",
+      "credentials": {
+        "telegramApi": {
+          "id": "2YqpIupmSXRLKGK3",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.photo[0] }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "d1a53419-bfdd-405b-8653-554469a70c8f"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "photo"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -400,
+        96
+      ],
+      "id": "5ce36cc5-272a-4e71-8591-e95cc54fd340",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Switch').item.json.message.photo[0].file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        96
+      ],
+      "id": "44f2b83e-2fe8-4225-b5ab-17ad51f09741",
+      "name": "Get a file",
+      "webhookId": "39a9bead-684e-44be-b884-6d6194947da9",
+      "credentials": {
+        "telegramApi": {
+          "id": "2YqpIupmSXRLKGK3",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "edit",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3-pro-image-preview",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3-pro-image-preview (Nano Banana Pro)"
+        },
+        "prompt": "=The user wants to: {{ $('Edit Fields1').item.json.message.caption }}. \nInstruction: Keep the person's face, features, and clothing exactly as they are in the original image. Only modify the background and environment to match the user's request. Maintain photorealism and consistent lighting.\nSubject consistency: high. Keep facial identity 100% unchanged. Only repaint the background pixels.",
+        "images": {
+          "values": [
+            {}
+          ]
+        },
+        "options": {
+          "binaryPropertyOutput": "edited"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        48,
+        80
+      ],
+      "id": "b970290f-991f-4d09-858d-9def408445a6",
+      "name": "Edit an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NKj9rzGR1ebxqkVZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ce05e0a-483d-4ca0-b2a1-31b41edba088",
+              "name": "message.caption",
+              "value": "={{ $json.message.caption }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        96
+      ],
+      "id": "a183f734-2909-48ec-86f5-78bb118bb378",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "binaryData": true,
+        "binaryPropertyName": "edited",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        272,
+        96
+      ],
+      "id": "19ca80bf-e343-4300-9f79-ea9b0bd94a56",
+      "name": "Send a photo message1",
+      "webhookId": "80932fc7-55d0-45b5-9780-c79396758880",
+      "credentials": {
+        "telegramApi": {
+          "id": "2YqpIupmSXRLKGK3",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a file": {
+      "main": [
+        [
+          {
+            "node": "Edit an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Get a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit an image": {
+      "main": [
+        [
+          {
+            "node": "Send a photo message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "88f429c4-2a93-4973-9d98-f659fed60279",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ecf0b36244ac94d455db9130b3305b68c4ffb5f1f8a7a59e69c7c8e9e9e99fd"
+  },
+  "id": "niv1Ht8d6v3U6NMKW5F3G",
+  "tags": []
+}

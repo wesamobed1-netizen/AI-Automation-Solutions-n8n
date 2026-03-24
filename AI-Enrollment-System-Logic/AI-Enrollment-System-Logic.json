@@ -1,0 +1,700 @@
+{
+  "name": "collage",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\nأنت مساعد ذكي لنظام التسجيل الجامعي. مهمتك معالجة طلبات الطلاب حسب النوع:\n\nأنواع الطلبات والتعليمات:\nتسجيل جديد: (اسم، جوال، إيميل، تخصص)\nالاسم : {{ $json.body.studentName }}\nرقم الموبايل : {{ $json.body.studentPhone }}\nالايميل : {{ $json.body.studentEmail }}\nالدرجة : {{ $json.body.studentGrade }}\nالتخصص المطلوب : {{ $json.body.studentMajor }}\n✓ اكتمال البيانات → \"تم التسجيل\"\n✗ نقص البيانات → \"المعلومات ناقصة\"\n✗ تخصص غير متوفر → \"هذا الاختصاص غير متوفر\"\n\n\n\nاستفسارات:\nخذ الداتا من اداة الشيت المربوطة \n✓ الرد المختصر المباشر\n\nنماذج الردود:\n\n\"تم التسجيل\"\n\n\"المعلومات ناقصة\"\n\n\"هذا الاختصاص غير متوفر\"\n\n[للاستفسارات] \"موعد التسجيل ينتهي الجمعة\"\n\n[للاستفسارات] \"الشروط: شهادة ثانوية + صورة شخصية\"\n\nممنوع:\n\nأي رسائل طويلة\n\nشرح إضافي\n\nاعتذارات مطولة\n\nتأكيد استلام الملاحظات",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        480
+      ],
+      "id": "cdacdc55-60cc-4358-b8e6-65731927215c",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "moonshotai/kimi-k2-instruct-0905",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        624
+      ],
+      "id": "124eb1d6-885e-4c5a-b2f8-b38f6d82ea47",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "UxAVbhyeS4lCT8cP",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jOpASTHj2smqF0WXrvN9Y7-fnbW2ghlzqTwxEGWoYzA",
+          "mode": "list",
+          "cachedResultName": "الفروع الموجودة بالجامعة",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jOpASTHj2smqF0WXrvN9Y7-fnbW2ghlzqTwxEGWoYzA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jOpASTHj2smqF0WXrvN9Y7-fnbW2ghlzqTwxEGWoYzA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -240,
+        624
+      ],
+      "id": "7083531e-7a3b-4710-9301-c0f4d4b006ce",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gj5wKQlOyjnfC2u3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.studentEmail }}",
+        "subject": "بيانات التسجيل في الجامعة",
+        "emailType": "text",
+        "message": "=الاسم : {{ $('If1').item.json.body.studentName }}\nالدرجة : {{ $('If1').item.json.body.studentGrade }}\nالتخصص : {{ $('If1').item.json.body.studentMajor }}\nالسعر السنوي : {{ $('If1').item.json.body.price }}\nتاريخ التسجيل : {{ $('Webhook').item.json.body.timestamp }}\n{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        336
+      ],
+      "id": "1f864bcb-7683-4eb6-85f2-ad69d2615f8e",
+      "name": "Send a message",
+      "webhookId": "7d222f0a-b955-4a4f-808d-75b064c4dc96",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OSlBuBOfMECfDx5P",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Ha467-lTEAPvefW6nxAdYRRnOiT1PnB0_236bWCvDiw",
+          "mode": "list",
+          "cachedResultName": "بيانات تسجيل الطلاب",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ha467-lTEAPvefW6nxAdYRRnOiT1PnB0_236bWCvDiw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ha467-lTEAPvefW6nxAdYRRnOiT1PnB0_236bWCvDiw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "الاسم": "={{ $('Webhook').item.json.body.studentName }}",
+            "رقم الموبايل": "={{ $('Webhook').item.json.body.studentPhone }}",
+            "الايميل": "={{ $('Webhook').item.json.body.studentEmail }}",
+            "التخصص": "={{ $('Webhook').item.json.body.studentMajor }}",
+            "الحالة ": "={{ $('AI Agent').item.json.output }}",
+            "الدرجة": "={{ $('Webhook').item.json.body.studentGrade }}",
+            "تاريخ التسجيل": "={{ $('If1').item.json.body.timestamp }}",
+            "السعر السنوي": "={{ $('Webhook').item.json.body.price }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "الاسم",
+              "displayName": "الاسم",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "رقم الموبايل",
+              "displayName": "رقم الموبايل",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "الايميل",
+              "displayName": "الايميل",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "الدرجة",
+              "displayName": "الدرجة",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "التخصص",
+              "displayName": "التخصص",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "السعر السنوي",
+              "displayName": "السعر السنوي",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "الحالة ",
+              "displayName": "الحالة ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "تاريخ التسجيل",
+              "displayName": "تاريخ التسجيل",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        16,
+        480
+      ],
+      "id": "72356cc7-16b5-4deb-8c52-df499239bcbe",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gj5wKQlOyjnfC2u3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=أنت مساعد ذكي لنظام التسجيل الجامعي. مهمتك معالجة طلبات الطلاب حسب النوع:\n{{ $json.body.inquiryQuestion }}\nتعليمات الرد:\n✓ الرد المختصر المباشر (جملة واحدة)\nالاجابة ضمن ملف الاكسل شيت عن توافر الفروع والاسعار \nواذا الفرع غير موجود اجبه ب لايتوفر \nالعملة هي الدينار العراقي\nالاجابة باختصار\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        192
+      ],
+      "id": "27b723f4-2dd0-4656-8320-c1dc683f44f5",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1jOpASTHj2smqF0WXrvN9Y7-fnbW2ghlzqTwxEGWoYzA",
+          "mode": "list",
+          "cachedResultName": "الفروع الموجودة بالجامعة",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jOpASTHj2smqF0WXrvN9Y7-fnbW2ghlzqTwxEGWoYzA/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1jOpASTHj2smqF0WXrvN9Y7-fnbW2ghlzqTwxEGWoYzA/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -240,
+        336
+      ],
+      "id": "83f73d21-5221-466a-9ae4-3a1b2b468ddc",
+      "name": "Get row(s) in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gj5wKQlOyjnfC2u3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3-32b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        336
+      ],
+      "id": "88e6ec3a-d5a3-4a67-b23f-54ecece85165",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "UxAVbhyeS4lCT8cP",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1npB0hTAXyzDA9TAVvbTHNRp5O5c70fcb6uHkeNBqs3k",
+          "mode": "list",
+          "cachedResultName": "استفسارات الطلاب",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npB0hTAXyzDA9TAVvbTHNRp5O5c70fcb6uHkeNBqs3k/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1npB0hTAXyzDA9TAVvbTHNRp5O5c70fcb6uHkeNBqs3k/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "اسم الطالب": "={{ $('Webhook').item.json.body.inquiryName }}",
+            "الاستفسار ": "={{ $('Webhook').item.json.body.inquiryQuestion }}",
+            "الجواب": "={{ $json.output }}",
+            "الايميل ": "={{ $('Webhook').item.json.body.inquiryEmail }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "اسم الطالب",
+              "displayName": "اسم الطالب",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "الايميل ",
+              "displayName": "الايميل ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "الاستفسار ",
+              "displayName": "الاستفسار ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "الجواب",
+              "displayName": "الجواب",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0e65866d-8cb7-4321-8d3d-f4777104a940",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gj5wKQlOyjnfC2u3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.inquiryEmail }}",
+        "subject": "الرد على الاستفسارات",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        16,
+        192
+      ],
+      "id": "237a2d4c-a286-40fb-b563-1e4244657c83",
+      "name": "Send a message1",
+      "webhookId": "0930398a-a5ab-4885-984a-1314b84d5b34",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "OSlBuBOfMECfDx5P",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1m5jtChCKmZg7OlNuqndijHwMIpsBcLEjUej3kaC1MB0",
+          "mode": "list",
+          "cachedResultName": "ملاحظات الطالب",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1m5jtChCKmZg7OlNuqndijHwMIpsBcLEjUej3kaC1MB0/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1m5jtChCKmZg7OlNuqndijHwMIpsBcLEjUej3kaC1MB0/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "الملاحظة ": "={{ $json.body.feedbackNotes }}",
+            "اسم الطالب": "={{ $json.body.feedbackName }}",
+            "الايميل": "={{ $json.body.feedbackEmail }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "اسم الطالب",
+              "displayName": "اسم الطالب",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "الايميل",
+              "displayName": "الايميل",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "الملاحظة ",
+              "displayName": "الملاحظة ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -928,
+        400
+      ],
+      "id": "a03b1e2c-f0de-48a7-8b94-d7080124d8bf",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Gj5wKQlOyjnfC2u3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b41f45f7-8cf6-4078-895b-29684c939d2d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -1296,
+        304
+      ],
+      "id": "39758ade-6c14-43f4-9ccd-5d9342be470f",
+      "name": "Webhook",
+      "webhookId": "b41f45f7-8cf6-4078-895b-29684c939d2d"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fbcefd48-c8b2-4c7c-b22c-88062952a25b",
+              "leftValue": "={{ $json.body.inquiryQuestion }}",
+              "rightValue": "={{ $json.body.inquiryQuestion }}",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -848,
+        176
+      ],
+      "id": "274c2bcd-0ae3-44c2-9e74-89983e3d3d11",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "96be7adc-a4a1-446c-8917-fd15b345d6bc",
+              "leftValue": "={{ $json.body.studentMajor }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -720,
+        320
+      ],
+      "id": "c13978ad-d332-4a41-ba62-f441cfb52575",
+      "name": "If1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "10d912e5-9642-4076-9f4f-725ba7a23ebf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "807d584322770c09bfd8de79fcae5cd602fd9a4608fcd01394c716693ac71671"
+  },
+  "id": "E1QIUiRgxGsjTptD",
+  "tags": []
+}

@@ -1,0 +1,192 @@
+{
+  "name": "MCP",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -384,
+        48
+      ],
+      "id": "0e8ed9cb-8e83-4cf6-9409-7f4154e9b7f6",
+      "name": "When chat message received",
+      "webhookId": "e93dfce8-c88f-433e-a164-7730ed0d70a4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }} short answer",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -208,
+        -16
+      ],
+      "id": "82381262-a20c-461c-aa81-b17f9cc7c259",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -96,
+        176
+      ],
+      "id": "6c28608f-e39f-488b-abb9-edcb56c0cc17",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "9Xl68SKJiBcZKEy4",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -288,
+        176
+      ],
+      "id": "575e804f-95c2-4f7e-885f-84f3ae7620f2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NKj9rzGR1ebxqkVZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://ain8nagent.cfd/mcp/email",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        144
+      ],
+      "id": "b8eaa880-2dc3-423f-af1e-abc2df1c2b3e",
+      "name": "MCP Client1"
+    },
+    {
+      "parameters": {
+        "path": "email"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -16
+      ],
+      "id": "90ac0a50-f9c3-4143-85c6-c7012512ce54",
+      "name": "MCP Server Trigger",
+      "webhookId": "45d3bba7-ddc9-442f-8383-c23e7143cb01"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.2,
+      "position": [
+        336,
+        192
+      ],
+      "id": "0fbf26c2-684b-40dc-8c85-8a2bf49766b5",
+      "name": "Send a message in Gmail",
+      "webhookId": "67d7ac8b-3b6b-4dab-981c-064040ca422e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UsyWGgGvbwCsKxys",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "e083d528-31a4-44c6-8f54-3eae2270cdee",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ecf0b36244ac94d455db9130b3305b68c4ffb5f1f8a7a59e69c7c8e9e9e99fd"
+  },
+  "id": "DPx011w7vbjQtUj-Ve1r6",
+  "tags": []
+}

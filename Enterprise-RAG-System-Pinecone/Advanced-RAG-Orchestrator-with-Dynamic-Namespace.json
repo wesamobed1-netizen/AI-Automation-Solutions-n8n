@@ -1,0 +1,593 @@
+{
+  "name": "Ragtest1 full System very accurate final copy copy",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1JMiTSbynRS-p7zRhx_ck3ZjJQmEZlW2h",
+          "mode": "list"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        80
+      ],
+      "id": "7dff3853-9054-4b4e-a8b6-2decce3722f3",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "XWDIm9BZOpENRcu0",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "apple2",
+          "mode": "list",
+          "cachedResultName": "apple2"
+        },
+        "embeddingBatchSize": 2,
+        "options": {
+          "pineconeNamespace": "={{ $json.name }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        32
+      ],
+      "id": "b19f70ab-c4e2-468e-84f9-0e5a371dc953",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "xup7VPmn4MxIXow4",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        240
+      ],
+      "id": "cf864434-0fa9-4c76-8d4b-6c9fab32512c",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "OcxqkQXA0cWU4S7V",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "Apple_Report",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        240
+      ],
+      "id": "218195fe-fe5c-4b9b-89de-fc06d900e4f2",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "content": "# Base of Knowledge",
+        "height": 528,
+        "width": 1008
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        16
+      ],
+      "id": "ecd6a6bb-17d1-40e5-87d5-bbf3e8b494de",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Chat of Bot",
+        "height": 592,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        16
+      ],
+      "id": "604847a6-4785-41e7-9e23-656705aef5f2",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        432,
+        32
+      ],
+      "id": "fa07b9ac-1158-4bdd-9508-62b01cb7c0e5",
+      "name": "When chat message received",
+      "webhookId": "94725067-1900-43a0-83aa-331ccacd711f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "=You are an AI financial analyst specialized in analyzing Apple Inc.’s quarterly financial reports.\n\nYour main objective is to provide accurate, verified, and concise answers using the vector database that contains data from Apple’s Q1 , Q2, and Q3 financial reports.\n\nFollow these rules strictly:\n\n1. Use ONLY verified data extracted directly from the  Q1 , Q2, and Q3 reports in the vector database.\n2. If the information is missing, unclear, or not present, reply exactly with: “Insufficient data available in the reports.”\n3. Always include specific numbers, figures, or percentages whenever they exist in the reports.\n4. Clearly specify whether the data is from  Q1 , Q2, and Q3.\n5. Keep responses factual, short, and professional — avoid opinions, assumptions, or unrelated details.\n6. Focus solely on Apple’s financial data. Do not reference any other companies, years, or sources.\n\nYour goal: Deliver precise, data-backed insights into Apple’s quarterly financial performance with clarity and reliability.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        32
+      ],
+      "id": "6c5c275f-8de3-4dcb-8f64-a6a3d0023634",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        560,
+        256
+      ],
+      "id": "ad9e403b-a3d4-4408-868f-31e1d27c1f61",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "oekOLdbAMsL0giQ4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "=Retrieves documents related to Apple’s  Q1 , Q2, and Q3 earnings reports, including financial performance, outlook, profit margins, and other key details from the reports.",
+        "topK": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        960,
+        224
+      ],
+      "id": "6b68eb73-1e9f-45aa-971a-94310a7bae12",
+      "name": "Answer questions with a vector store"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "apple2",
+          "mode": "list",
+          "cachedResultName": "apple2"
+        },
+        "options": {
+          "pineconeNamespace": "={{ $json.name }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        336
+      ],
+      "id": "5b59f136-7813-411c-b270-aa7e5d7cf419",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "xup7VPmn4MxIXow4",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        480
+      ],
+      "id": "6df0a8b0-031d-4292-9b6c-48beb1af3c9f",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "OcxqkQXA0cWU4S7V",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        416
+      ],
+      "id": "49029778-ffab-45d7-8bca-5b4658b4b827",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "oekOLdbAMsL0giQ4",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "12MGMFHGqXzcAC-rIfQw3QUykqYKQtrS4",
+            "mode": "list",
+            "cachedResultName": "apple report quarter ersults",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/12MGMFHGqXzcAC-rIfQw3QUykqYKQtrS4"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -640,
+        272
+      ],
+      "id": "065215f8-6a31-413a-983e-1ab93eb00c67",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "XWDIm9BZOpENRcu0",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -176,
+        320
+      ],
+      "id": "86519c51-94b2-4a91-840e-92850b4e31be",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "XWDIm9BZOpENRcu0",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6382efdf-7c6c-4d4d-b2b9-e1cdeec6bd13",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "e8a96c3f-463b-4a48-a57a-06ea0b26ff00",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        464
+      ],
+      "id": "489efab3-7941-4be8-a15d-db5e18c660f9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -256,
+        64
+      ],
+      "id": "8e8bd7f8-d563-4cab-910c-a18ae5d3c4ae",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        160,
+        400
+      ],
+      "id": "2d966c2b-92d2-4dd3-9ea7-5285314c4baa",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "edda74b2-3890-4d1b-bb1d-c7a0292f049f",
+              "name": "name",
+              "value": "={{\n  $json.chatInput.toLowerCase().includes('q1')\n    ? 'q1.pdf'\n    : $json.chatInput.toLowerCase().includes('q2')\n    ? 'q2.pdf'\n    : $json.chatInput.toLowerCase().includes('q3')\n    ? 'q3.pdf'\n    : 'all-report'\n}}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        32
+      ],
+      "id": "555d8600-ab55-4064-9543-9d18067068ab",
+      "name": "Set Namespace Logic"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Set Namespace Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Namespace Logic": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b98a6047-1082-4c36-8f96-b2508e8c7813",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "807d584322770c09bfd8de79fcae5cd602fd9a4608fcd01394c716693ac71671"
+  },
+  "id": "wHyDpt7eMXdjQAaT",
+  "tags": []
+}

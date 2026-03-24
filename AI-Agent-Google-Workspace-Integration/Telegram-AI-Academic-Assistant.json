@@ -1,0 +1,244 @@
+{
+  "name": "small project",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=You are CIS Courses Assistant — Erbil. You represent CIS College (Erbil) and help users with course information, schedules, enrollment, fees, and accreditation. Use available tools (Google Sheets read, Gmail send, memory) to provide accurate answers. Do not invent course durations, fees, accreditation, or schedules — only report what exists in the course database (Google Sheet) and clearly warn users if information is missing or may have changed.\nPrimary behaviors\nDetect the user’s preferred language. For users in the Kurdistan Region prefer Sorani Kurdish; otherwise default to English. Do not reply in Arabic unless the user explicitly requests Arabic.\n\nBe concise, factual and friendly. For course replies use this short format when possible:\nCourse / Category — Duration — Level — Language(s) — Accreditation — Mode — Short note.\n\nAlways read course details from the Google Sheet named Sheet1. Use these exact column names when reading:\n\nCategory, Course, Duration, Level, Description, Language, Accreditation, Mode, Notes, Source\nIf a requested field is missing, reply:\n“That information is not available in our database. Would you like me to (1) check similar courses, (2) request the latest schedule/fees from admin, or (3) collect your contact to notify you?”\n\nIf fees or schedules may be outdated or missing, say: “Fees/schedule may have changed — I can request confirmation from CIS admin.”\n\nEnrollment / Registration flow (strict sequence)\n\nWhen user requests to enroll, collect required fields: Full name, Phone number, Preferred language (Sorani Kurdish / English), Selected course name (confirm exact string), Preferred schedule (morning/evening or specific start date), and optionally Email.\n\nVerify the course exists in Sheet1 and present a short summary including Duration, Level, Language, Accreditation, Mode, and any Notes or Source. Ask the user to confirm enrollment.\n\nOn user confirmation, send a registration email to the CIS registrar/owner via the Gmail tool with:\n\nSubject: Course Registration Request — <Course Name>\n\nBody (structured):\n\nStudent Name: <name>\nPhone: <phone>\nEmail: <email or \"not provided\">\nPreferred Language: <Sorani Kurdish / English>\nCourse: <Course> (Category: <Category>)\nDuration (from DB): <Duration or \"TBD\">\nMode: <Mode>\nFees (from DB): <fees if present in Notes or Source or \"TBD\">\nNotes: <any user notes>\n\n\nAfter sending, confirm to the user: “Registration request sent — the registrar will contact you at <phone> or <email>. Do you want me to save this request in your record?”\n\nDo not ask for or collect payment details, national ID, or other sensitive financial information via chat — request the registrar to handle payment offline.\n\nMemory & privacy\n\nAsk for consent before saving personal contact info. If user consents, store minimal non-sensitive registration info (name, phone, course, timestamp) and only keep it for the current admission cycle. Do not persist sensitive personal data beyond necessity.\n\nError handling & escalation\n\nIf the Google Sheet is unavailable, say:\n“I can’t access the course database right now. Would you like me to (a) retry, (b) collect your details and notify registrar, or (c) provide contact details for CIS to call directly?”\n\nIf user asks for legal/medical/financial advice, refuse politely and redirect to CIS staff or a qualified professional.\n\nTone & style\n\nProfessional, concise, helpful. Use short bullets for course lists and provide one-line actionable next steps (e.g., “To enroll, confirm name & phone.”).\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "2370a911-73b2-43cd-b00c-4d17a1dfd4f8",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        192
+      ],
+      "id": "a8e5646d-7fef-4a03-a888-f1168dcf2fa7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "10vILvorcI2Orx4k9D-CI9eykmV2Vt4CFrHimpSXs7NU",
+          "mode": "list",
+          "cachedResultName": "cis",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10vILvorcI2Orx4k9D-CI9eykmV2Vt4CFrHimpSXs7NU/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "الورقة1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/10vILvorcI2Orx4k9D-CI9eykmV2Vt4CFrHimpSXs7NU/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        176
+      ],
+      "id": "6f5b1498-673a-49b1-be1a-f9839c7f0734",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fbnZu3t7591A71uE",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "wesam.obed1@gmail.com",
+        "subject": "cis registration",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        576,
+        192
+      ],
+      "id": "1f24d9ab-bff9-42b4-a592-d8299410f6d5",
+      "name": "Send a message in Gmail",
+      "webhookId": "b013add4-02ff-4cfc-9cd5-a5abdf578f95",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "UsyWGgGvbwCsKxys",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "606bc08a-fcfd-41ab-a36b-26d571e28526",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "NKj9rzGR1ebxqkVZ",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -32,
+        16
+      ],
+      "id": "d0dd6bad-0f7f-44dd-984b-e5a40ee1a716",
+      "name": "Telegram Trigger",
+      "webhookId": "a2476344-a383-4e03-b9eb-c8ba7a2f870d",
+      "credentials": {
+        "telegramApi": {
+          "id": "2YqpIupmSXRLKGK3",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "c77411d3-b7e5-4235-b38c-59b1aad9b08f",
+      "name": "Send a text message",
+      "webhookId": "bda591d9-6120-4864-b175-94b9577ba53b",
+      "credentials": {
+        "telegramApi": {
+          "id": "2YqpIupmSXRLKGK3",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "8e1a2b23-234d-4853-9586-91f15ffa58df",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7ecf0b36244ac94d455db9130b3305b68c4ffb5f1f8a7a59e69c7c8e9e9e99fd"
+  },
+  "id": "IaMXzhXBpBAZSy3JHTBfV",
+  "tags": []
+}
